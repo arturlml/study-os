@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tuti · Study OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #e8e8f0;
+    --muted: #555568;
+    --databricks: #ff3d00;
+    --aws: #f59e0b;
+    --agentic: #06d6a0;
+    --accent: #7c6fcd;
+    --done: #22c55e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID NOISE BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .logo span { color: var(--text); }
+
+  .date-block {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  #live-date { color: var(--text); font-size: 12px; }
+
+  /* HERO */
+  .hero {
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 .dim { color: var(--muted); }
+
+  /* TODAY CARD */
+  .today-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    animation: fadeUp 0.5s 0.2s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .today-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+
+  .today-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .today-track {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .today-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .today-action {
+    margin-left: auto;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .today-action:hover { opacity: 0.8; }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* WEEKLY PLAN GRID */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+
+  .day-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .day-header {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    padding: 6px 0;
+  }
+
+  .day-header.today-col { color: var(--text); }
+
+  .day-slot {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
+  }
+
+  .day-slot:hover { filter: brightness(1.2); }
+
+  .day-slot.rest {
+    background: #111118;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .day-slot.databricks { background: rgba(255,61,0,0.12); border-color: rgba(255,61,0,0.3); color: var(--databricks); }
+  .day-slot.aws       { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: var(--aws); }
+  .day-slot.agentic   { background: rgba(6,214,160,0.12); border-color: rgba(6,214,160,0.3); color: var(--agentic); }
+  .day-slot.review    { background: rgba(124,111,205,0.12); border-color: rgba(124,111,205,0.3); color: var(--accent); }
+
+  .day-slot.done-slot::after {
+    content: '✓';
+    position: absolute;
+    top: 4px; right: 6px;
+    font-size: 9px;
+    color: var(--done);
+  }
+
+  .day-slot.done-slot { opacity: 0.5; }
+
+  .slot-track {
+    font-weight: 500;
+    margin-bottom: 3px;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .slot-time {
+    font-size: 10px;
+    opacity: 0.7;
+  }
+
+  /* TRACKS */
+  .tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.4s ease both;
+  }
+
+  .track-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .track-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .track-card.databricks::before { background: var(--databricks); }
+  .track-card.aws::before { background: var(--aws); }
+  .track-card.agentic::before { background: var(--agentic); }
+
+  .track-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .databricks .track-name { color: var(--databricks); }
+  .aws .track-name { color: var(--aws); }
+  .agentic .track-name { color: var(--agentic); }
+
+  .track-desc {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-bottom: 14px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+
+  .databricks .progress-fill { background: var(--databricks); }
+  .aws .progress-fill { background: var(--aws); }
+  .agentic .progress-fill { background: var(--agentic); }
+
+  /* SESSIONS LIST */
+  .sessions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .session-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .session-item:hover { background: rgba(255,255,255,0.06); }
+
+  .session-item.done {
+    opacity: 0.45;
+    text-decoration: line-through;
+    text-decoration-color: var(--muted);
+  }
+
+  .session-checkbox {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px;
+    transition: all 0.15s;
+  }
+
+  .session-item.done .session-checkbox {
+    background: var(--done);
+    border-color: var(--done);
+    color: white;
+  }
+
+  .session-text { flex: 1; line-height: 1.4; }
+  .session-h { font-size: 9px; color: var(--muted); white-space: nowrap; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* PROCRASTINATION GUARD */
+  .guard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 28px;
+    animation: fadeUp 0.5s 0.6s ease both;
+  }
+
+  .guard-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .rules {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rule {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 2px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .rule:hover { color: var(--text); border-left-color: var(--accent); background: rgba(124,111,205,0.05); }
+
+  .rule-num {
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+    width: 20px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .tracks-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .week-grid { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .day-slot { padding: 6px 4px; font-size: 8px; }
+    .hero h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo"><span>Tuti</span> · Study OS</div>
+    <div class="date-block">
+      <div id="live-date">...</div>
+      <div>Week goal: 6h study</div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>3 tracks. <br><span class="dim">No excuses.</span></h1>
+  </div>
+
+  <!-- TODAY CARD -->
+  <div class="today-card">
+    <div>
+      <div class="today-label">Study now</div>
+      <div class="today-track" id="today-track">Loading...</div>
+      <div class="today-sub" id="today-sub">...</div>
+    </div>
+    <button class="today-action" onclick="markTodayDone()">Mark done ✓</button>
+  </div>
+
+  <!-- WEEKLY PLAN -->
+  <div class="section-label">Weekly schedule</div>
+  <div class="week-grid" id="week-grid"></div>
+
+  <!-- TRACKS -->
+  <div class="section-label">Track progress</div>
+  <div class="tracks-grid" id="tracks-grid"></div>
+
+  <!-- STATS -->
+  <div class="section-label">This week</div>
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- GUARD -->
+  <div class="guard">
+    <div class="guard-title">// Anti-procrastination rules</div>
+    <div class="rules">
+      <div class="rule"><span class="rule-num">01</span>One track per day. Rotate. Never skip twice in a row.</div>
+      <div class="rule"><span class="rule-num">02</span>Sessions = 45 min focused, not "I'll start soon."</div>
+      <div class="rule"><span class="rule-num">03</span>If you can't do the planned track, do 20 min of any track. Motion beats perfection.</div>
+      <div class="rule"><span class="rule-num">04</span>Sunday = review only. No new content. Consolidate what you did.</div>
+      <div class="rule"><span class="rule-num">05</span>Databricks applies directly to IEDR. AWS ties to career. Agentic is your edge. All three matter.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'tuti_study_os_v2';
+
+const TRACKS = {
+  databricks: {
+    id: 'databricks',
+    name: 'Databricks',
+    desc: 'Delta Lake, PySpark, Unity Catalog, Lakehouse architecture',
+    color: 'var(--databricks)',
+    cssClass: 'databricks',
+    sessions: [
+      { id: 'db1', text: 'Delta Lake: time travel & VACUUM', h: '0.75h' },
+      { id: 'db2', text: 'Unity Catalog: data lineage & governance', h: '1h' },
+      { id: 'db3', text: 'Structured Streaming fundamentals', h: '1h' },
+      { id: 'db4', text: 'Performance: partitioning & Z-ordering', h: '0.75h' },
+      { id: 'db5', text: 'ML Flow basics + experiment tracking', h: '1h' },
+    ]
+  },
+  aws: {
+    id: 'aws',
+    name: 'AWS',
+    desc: 'S3, Glue, Athena, Redshift, IAM, certification path',
+    color: 'var(--aws)',
+    cssClass: 'aws',
+    sessions: [
+      { id: 'aws1', text: 'S3: lifecycle policies & storage classes', h: '0.75h' },
+      { id: 'aws2', text: 'AWS Glue: crawlers & ETL jobs', h: '1h' },
+      { id: 'aws3', text: 'Athena: query optimization & partitioning', h: '0.75h' },
+      { id: 'aws4', text: 'Redshift: distribution & sort keys', h: '1h' },
+      { id: 'aws5', text: 'IAM: roles, policies, cross-account access', h: '0.75h' },
+    ]
+  },
+  agentic: {
+    id: 'agentic',
+    name: 'Agentic AI',
+    desc: 'Anthropic API, tool use, multi-agent systems, MCP',
+    color: 'var(--agentic)',
+    cssClass: 'agentic',
+    sessions: [
+      { id: 'ag1', text: 'Tool use: structured outputs & function calling', h: '1h' },
+      { id: 'ag2', text: 'Multi-agent orchestration patterns', h: '1h' },
+      { id: 'ag3', text: 'MCP: build a custom server', h: '1.5h' },
+      { id: 'ag4', text: 'Memory & context management strategies', h: '0.75h' },
+      { id: 'ag5', text: 'Production agent: error handling & retries', h: '1h' },
+    ]
+  }
+};
+
+// Weekly schedule: Mon=0 ... Sun=6
+// Pattern: DB, AWS, Agentic, DB, AWS, Review, Rest
+const WEEK_PLAN = [
+  { track: 'databricks', label: 'Databricks', time: '45 min', cssClass: 'databricks' },
+  { track: 'aws',        label: 'AWS',        time: '45 min', cssClass: 'aws' },
+  { track: 'agentic',   label: 'Agentic',    time: '1h',     cssClass: 'agentic' },
+  { track: 'databricks', label: 'Databricks', time: '45 min', cssClass: 'databricks' },
+  { track: 'aws',        label: 'AWS',        time: '45 min', cssClass: 'aws' },
+  { track: 'review',    label: 'Review',     time: '1h',     cssClass: 'review' },
+  { track: 'rest',      label: 'Rest',       time: '',       cssClass: 'rest' },
+];
+
+const DAY_NAMES = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { doneSessions: {}, doneDays: {}, weekStart: null };
+  } catch { return { doneSessions: {}, doneDays: {}, weekStart: null }; }
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+
+// ── DATE HELPERS ───────────────────────────────────────────────────────────
+function getTodayDayOfWeek() {
+  // 0=Mon ... 6=Sun
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+function getWeekKey() {
+  const d = new Date();
+  const day = d.getDay() === 0 ? 7 : d.getDay();
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - day + 1);
+  return mon.toISOString().slice(0, 10);
+}
+
+function resetWeekIfNew() {
+  const wk = getWeekKey();
+  if (state.weekStart !== wk) {
+    state.doneDays = {};
+    state.weekStart = wk;
+    saveState(state);
+  }
+}
+
+// ── COMPUTED ───────────────────────────────────────────────────────────────
+function getCompletedCount(trackId) {
+  return Object.keys(state.doneSessions).filter(k => k.startsWith(trackId + '_')).length;
+}
+
+function getWeekDoneCount() {
+  return Object.keys(state.doneDays).filter(k => state.doneDays[k]).length;
+}
+
+function getTotalHoursThisWeek() {
+  const doneCount = getWeekDoneCount();
+  return (doneCount * 0.75).toFixed(1);
+}
+
+// ── RENDER DATE ────────────────────────────────────────────────────────────
+function renderDate() {
+  const d = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('live-date').textContent = d.toLocaleDateString('en-US', opts);
+}
+
+// ── RENDER TODAY ───────────────────────────────────────────────────────────
+function renderToday() {
+  const dow = getTodayDayOfWeek();
+  const plan = WEEK_PLAN[dow];
+  const el = document.getElementById('today-track');
+  const sub = document.getElementById('today-sub');
+
+  if (plan.track === 'rest') {
+    el.textContent = 'Rest day';
+    sub.textContent = 'Recover. You earned it.';
+    return;
+  }
+  if (plan.track === 'review') {
+    el.textContent = 'Review session';
+    sub.textContent = 'Consolidate this week — no new content today.';
+    return;
+  }
+
+  const track = TRACKS[plan.track];
+  el.textContent = track.name;
+  el.style.color = track.color;
+
+  // Find first not-done session
+  const nextSession = track.sessions.find(s => !state.doneSessions[track.id + '_' + s.id]);
+  sub.textContent = nextSession ? nextSession.text : 'All sessions done! Pick a review or go deeper.';
+}
+
+// ── RENDER WEEK GRID ───────────────────────────────────────────────────────
+function renderWeekGrid() {
+  const dow = getTodayDayOfWeek();
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+
+  WEEK_PLAN.forEach((plan, i) => {
+    const col = document.createElement('div');
+    col.className = 'day-col';
+
+    const header = document.createElement('div');
+    header.className = 'day-header' + (i === dow ? ' today-col' : '');
+    header.textContent = DAY_NAMES[i] + (i === dow ? ' ·' : '');
+    col.appendChild(header);
+
+    const slot = document.createElement('div');
+    const isDone = state.doneDays[i];
+    slot.className = `day-slot ${plan.cssClass}${isDone ? ' done-slot' : ''}`;
+    slot.innerHTML = `<div class="slot-track">${plan.label}</div><div class="slot-time">${plan.time}</div>`;
+    slot.title = `Click to toggle ${DAY_NAMES[i]}`;
+    slot.onclick = () => {
+      state.doneDays[i] = !state.doneDays[i];
+      saveState(state);
+      renderAll();
+    };
+    col.appendChild(slot);
+    grid.appendChild(col);
+  });
+}
+
+// ── RENDER TRACKS ──────────────────────────────────────────────────────────
+function renderTracks() {
+  const grid = document.getElementById('tracks-grid');
+  grid.innerHTML = '';
+
+  Object.values(TRACKS).forEach(track => {
+    const doneCount = getCompletedCount(track.id);
+    const total = track.sessions.length;
+    const pct = Math.round((doneCount / total) * 100);
+
+    const card = document.createElement('div');
+    card.className = `track-card ${track.cssClass}`;
+
+    card.innerHTML = `
+      <div class="track-name">${track.name}</div>
+      <div class="track-desc">${track.desc}</div>
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span>Progress</span>
+          <span>${doneCount}/${total} sessions · ${pct}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${pct}%"></div>
+        </div>
+      </div>
+      <div class="sessions" id="sessions-${track.id}"></div>
+    `;
+    grid.appendChild(card);
+
+    const sessionsEl = card.querySelector(`#sessions-${track.id}`);
+    track.sessions.forEach(s => {
+      const key = track.id + '_' + s.id;
+      const done = !!state.doneSessions[key];
+      const item = document.createElement('div');
+      item.className = `session-item${done ? ' done' : ''}`;
+      item.innerHTML = `
+        <div class="session-checkbox">${done ? '✓' : ''}</div>
+        <div class="session-text">${s.text}</div>
+        <div class="session-h">${s.h}</div>
+      `;
+      item.onclick = () => {
+        if (done) delete state.doneSessions[key];
+        else state.doneSessions[key] = true;
+        saveState(state);
+        renderAll();
+      };
+      sessionsEl.appendChild(item);
+    });
+  });
+}
+
+// ── RENDER STATS ───────────────────────────────────────────────────────────
+function renderStats() {
+  const totalSessions = Object.values(TRACKS).reduce((a, t) => a + t.sessions.length, 0);
+  const doneSessions = Object.keys(state.doneSessions).length;
+  const weekDays = getWeekDoneCount();
+  const hours = getTotalHoursThisWeek();
+  const streak = weekDays; // simplified
+
+  const stats = [
+    { value: weekDays + '/6', label: 'Days this week', color: 'var(--accent)' },
+    { value: hours + 'h', label: 'Hours logged', color: 'var(--done)' },
+    { value: doneSessions + '/' + totalSessions, label: 'Sessions done', color: 'var(--text)' },
+    { value: streak + '🔥', label: 'Day streak', color: 'var(--aws)' },
+  ];
+
+  const row = document.getElementById('stats-row');
+  row.innerHTML = '';
+  stats.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = `
+      <div class="stat-value" style="color: ${s.color}">${s.value}</div>
+      <div class="stat-label">${s.label}</div>
+    `;
+    row.appendChild(card);
+  });
+}
+
+// ── TODAY DONE ─────────────────────────────────────────────────────────────
+function markTodayDone() {
+  const dow = getTodayDayOfWeek();
+  state.doneDays[dow] = true;
+  saveState(state);
+  renderAll();
+}
+
+// ── RENDER ALL ─────────────────────────────────────────────────────────────
+function renderAll() {
+  renderDate();
+  renderToday();
+  renderWeekGrid();
+  renderTracks();
+  renderStats();
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+resetWeekIfNew();
+renderAll();
+setInterval(renderDate, 60000);
+</script>
+</body>
+</html>
