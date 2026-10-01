@@ -1,6 +1,6 @@
 # Study OS
 
-Single-page study planner I use to organize my learning tracks: **Databricks**, **AWS** data services (e.g. Glue, Athena) and **Agentic AI**. Shows a weekly schedule, session durations per track and progress tracking.
+Single-page study planner I use to organize my learning tracks: **Databricks**, **AWS** data services (e.g. Glue) and **Agentic AI**. Shows a weekly schedule, session durations per track and progress tracking.
 
 ## Run
 
